@@ -16,6 +16,9 @@ int main(void) {
         printf("> ");
         if (fgets(command, sizeof(command), stdin) != NULL) {
             remove_trailing_newline(command, strlen(command));
+            if (strcmp(command, "exit") == 0) {
+                break;
+            }
             printf("%s: command not found\n", command);
         }
     }
