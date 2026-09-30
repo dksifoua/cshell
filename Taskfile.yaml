@@ -1,0 +1,39 @@
+# yaml-language-server: $schema=https://taskfile.dev/schema.json
+
+version: '3'
+
+vars:
+  GREETING: Hello, world!
+
+tasks:
+  default:
+    desc: Print a greeting message
+    cmds:
+      - echo "{{.GREETING}}"
+    silent: true
+
+  clean:
+    desc: Clean build
+    cmd: rm -rf build
+    silent: true
+
+  configure:
+    desc: Configure cmake build directory
+    deps:
+      - clean
+    cmd: cmake -S . -B build
+    silent: true
+
+  build:
+    desc: Run the build system
+    deps:
+      - configure
+    cmd: cmake --build build
+    silent: true
+
+  cshell:
+    desc: Run the cshell program
+    deps:
+      - build
+    cmd: build/cshell
+    silent: true
