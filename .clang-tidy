@@ -1,23 +1,34 @@
 ---
 Checks: >
+  clang-diagnostic-*,
   -*,
   bugprone-*,
-  performance-*,
-  readability-*,
+  cert-*,
+  cppcoreguidelines-*,
+  google-*,
+  hicpp-*,
+  misc-*,
   modernize-*,
-  -modernize-use-trailing-return-type,
-  -readability-braces-around-statements
-
-WarningsAsErrors: '*'
-
+  mpi-*,
+  openmp-*,
+  performance-*,
+  portability-*,
+  readability-*
+WarningsAsErrors: "*"
+ExtraArgs: ['-std=c23']
+SystemHeaders: false
+HeaderFileExtensions:
+  - h
+ImplementationFileExtensions:
+  - c
 CheckOptions:
-  - key:             readability-identifier-naming.ClassCase
-    value:           CamelCase
-  - key:             readability-identifier-naming.VariableCase
-    value:           snake_case
-  - key:             readability-identifier-naming.FunctionCase
-    value:           camelCase
+  - key: readability-identifier-naming.ClassCase
+    value: CamelCase
+  - key: readability-identifier-naming.VariableCase
+    value: snake_case
+  - key: readability-identifier-naming.FunctionCase
+    value: camelCase
 
-  - key:             modernize-use-using.IgnoreMacros
-    value:           'true'
+  - key: modernize-use-using.IgnoreMacros
+    value: "true"
 ...

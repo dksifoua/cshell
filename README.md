@@ -1,2 +1,2 @@
 # cshell
-A custom shell implementation written in c.
+A custom shell implementation written in c23.

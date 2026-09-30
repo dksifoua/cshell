@@ -1,25 +1,35 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
-#define MAX_COMMAND_LENGTH 1024
+#define MAX_INPUT_LENGTH 1024
+
+static constexpr char ECHO_COMMAND[] = "echo ";
 
 static void remove_trailing_newline(char *input, size_t length);
 
-int main(void) {
-    setbuf(stdout, NULL);
+int main() {
+    if (setvbuf(stdout, nullptr, _IONBF, 0) != 0) {
+        perror("setvbuf failed");
+        return EXIT_FAILURE;
+    }
     printf("CSHELL V%s\n", CSHELL_VERSION);
 
-    char command[MAX_COMMAND_LENGTH];
+    char input[MAX_INPUT_LENGTH];
     while (true) {
-        printf("> ");
-        if (fgets(command, sizeof(command), stdin) != NULL) {
-            remove_trailing_newline(command, strlen(command));
-            if (strcmp(command, "exit") == 0) {
+        printf("$ ");
+        if (fgets(input, sizeof(input), stdin) != NULL) {
+            remove_trailing_newline(input, strlen(input));
+            if (strcmp(input, "exit") == 0) {
                 break;
             }
-            printf("%s: command not found\n", command);
+            if (strncmp(input, ECHO_COMMAND, strlen(ECHO_COMMAND)) == 0) {
+                printf("%s\n", input + strlen(ECHO_COMMAND));
+            } else {
+                printf("%s: command not found\n", input);
+            }
         }
     }
 
@@ -27,8 +37,8 @@ int main(void) {
 }
 
 static void remove_trailing_newline(char *input, const size_t length) {
-    const size_t n = strcspn(input, "\r\n");
-    if (n < length) {
-        input[n] = '\0';
+    const size_t index = strcspn(input, "\r\n");
+    if (index < length) {
+        input[index] = '\0';
     }
 }
