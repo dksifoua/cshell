@@ -72,6 +72,23 @@ int main() {
             continue;
         }
 
+        char full_command_path[PATH_MAX];
+        if (is_command_executable(command, full_command_path)) {
+            FILE *fd = popen(input, "r");
+            if (fd == nullptr) {
+                perror("popen() failed");
+            } else {
+                char output_buffer[1024];
+                while (fgets(output_buffer, sizeof(output_buffer), fd) != nullptr) {
+                    printf("%s", output_buffer);
+                }
+                if (pclose(fd) != 0) {
+                    perror("pclose() failed");
+                }
+            }
+            continue;
+        }
+
         printf("%s: command not found\n", command.name);
     }
 
