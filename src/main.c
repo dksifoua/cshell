@@ -1,18 +1,24 @@
-#include <stdbool.h>
+#include <dirent.h>
+#include <limits.h>
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/stat.h>
+#include <unistd.h>
 
+#define MAX_COMMAND_LENGTH 128
 #define MAX_INPUT_LENGTH 1024
 
 struct command {
-    const char *name;
-    const size_t length;
+    char name[MAX_COMMAND_LENGTH];
+    size_t length;
 };
 
 static void remove_trailing_newline(char *input);
-static struct command extract_command(char *input);
+static struct command extract_command(const char *input);
+static bool is_command_builtin(struct command command);
+static bool is_command_executable(struct command command, char *full_command_path);
 
 int main() {
     if (setvbuf(stdout, nullptr, _IONBF, 0) != 0) {
@@ -50,14 +56,15 @@ int main() {
         if (strcmp(command.name, "type") == 0) {
             if (input_length > command.length) {
                 const struct command argument_command = extract_command(input + command.length + 1);
-                if (strcmp(argument_command.name, "echo") == 0) {
-                    printf("echo is a shell builtin\n");
-                } else if (strcmp(argument_command.name, "exit") == 0) {
-                    printf("exit is a shell builtin\n");
-                } else if (strcmp(argument_command.name, "type") == 0) {
-                    printf("type is a shell builtin\n");
+                if (is_command_builtin(argument_command)) {
+                    printf("%s is a shell builtin\n", argument_command.name);
                 } else {
-                    printf("%s: not found\n", argument_command.name);
+                    char full_command_path[PATH_MAX];
+                    if (is_command_executable(argument_command, full_command_path)) {
+                        printf("%s is %s\n", argument_command.name, full_command_path);
+                    } else {
+                        printf("%s: not found\n", argument_command.name);
+                    }
                 }
             } else {
                 fprintf(stderr, "\n");
@@ -72,18 +79,57 @@ int main() {
 }
 
 static void remove_trailing_newline(char *input) {
+    if (input == nullptr) {
+        return;
+    }
     const size_t index = strcspn(input, "\n");
     if (index < strlen(input)) {
         input[index] = '\0';
     }
 }
 
-static struct command extract_command(char *input) {
+static struct command extract_command(const char *input) {
+    struct command command = {.name[0] = '\0', .length = 0};
+    if (input == nullptr) {
+        return command;
+    }
+
     const char *delimiter = strchr(input, ' ');
-    const bool delimiter_found = delimiter == nullptr;
+    size_t full_length = delimiter == nullptr ? strlen(input) : delimiter - input;
 
-    const size_t length = delimiter_found ? strlen(input) : delimiter - input;
-    const char *name = delimiter_found ? input : strndup(input, length);
+    command.length = full_length >= MAX_COMMAND_LENGTH ? MAX_COMMAND_LENGTH - 1 : full_length;
+    memcpy(command.name, input, command.length);
+    command.name[command.length] = '\0';
+    return command;
+}
 
-    return (struct command){.name = name, .length = length};
+static bool is_command_builtin(const struct command command) {
+    if (strcmp(command.name, "echo") == 0 || strcmp(command.name, "exit") == 0 || strcmp(command.name, "type") == 0) {
+        return true;
+    }
+
+    return false;
+}
+
+static bool is_command_executable(const struct command command, char *full_command_path) {
+    const char *env_path = getenv("PATH");
+    if (env_path == nullptr) {
+        return false;
+    }
+
+    const size_t env_path_length = strlen(env_path);
+    char env_path_copy[env_path_length + 1];
+    memcpy(env_path_copy, env_path, env_path_length);
+    env_path_copy[env_path_length] = '\0';
+
+    for (char *current_path = strtok(env_path_copy, ":"); current_path != nullptr; current_path = strtok(nullptr, ":")) {
+        snprintf(full_command_path, PATH_MAX, "%s/%s", current_path, command.name);
+
+        struct stat stat_buffer;
+        if (stat(full_command_path, &stat_buffer) == 0 && access(full_command_path, X_OK) == 0) {
+            return true;
+        }
+    }
+
+    return false;
 }
