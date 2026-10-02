@@ -12,24 +12,19 @@ set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_C_EXTENSIONS OFF)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-add_compile_options(-Wall -Wextra -Werror -pedantic)
+option(BUILD_TESTING "Enable testing and build tests" ON)
+
+include(FetchContent)
 
 add_executable(cshell)
-target_sources(cshell
-    PRIVATE
-        src/main.c
-)
-target_link_libraries(cshell
-    PRIVATE
-        cshellinc
-)
-target_compile_definitions(cshell
-    PRIVATE
-        CSHELL_VERSION="${PROJECT_VERSION}"
-)
+target_compile_definitions(cshell PRIVATE CSHELL_VERSION="${PROJECT_VERSION}")
+target_compile_options(cshell PRIVATE -Wall -Wextra -Werror -pedantic)
+target_link_libraries(cshell PRIVATE cshell_lib)
+target_sources(cshell PRIVATE src/main.c)
 
-add_library(cshellinc)
-target_sources(cshellinc
+add_library(cshell_lib)
+target_compile_options(cshell_lib PRIVATE -Wall -Wextra -Werror -pedantic)
+target_sources(cshell_lib
     PRIVATE
         src/command.c
         src/utils.c
@@ -43,3 +38,20 @@ target_sources(cshellinc
             include/cshell/command.h
             include/cshell/utils.h
 )
+
+if(BUILD_TESTING)
+    FetchContent_Declare(cmocka
+        GIT_REPOSITORY https://git.cryptomilk.org/projects/cmocka.git
+        GIT_TAG cmocka-2.0.2
+        SYSTEM
+    )
+    FetchContent_MakeAvailable(cmocka)
+
+    enable_testing()
+
+    add_executable(cshell_test)
+    target_compile_options(cshell_test PRIVATE -Wall -Wextra -Werror -pedantic)
+    target_sources(cshell_test PRIVATE tests/utils_test.c)
+    target_link_libraries(cshell_test PRIVATE cshell_lib cmocka)
+    add_test(NAME cshell_test COMMAND cshell_test)
+endif()

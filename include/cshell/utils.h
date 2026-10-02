@@ -1,6 +1,8 @@
 #ifndef UTILS_H
 #define UTILS_H
 
+#include <stdbool.h>
+
 void disable_stdout_buffering(void);
 
 void remove_leading_whitespace(char *user_input);

@@ -36,6 +36,8 @@ void remove_trailing_newline(char *user_input) {
     if (index < strlen(user_input)) {
         user_input[index] = '\0';
     }
+
+    // TODO(dksifoua): remove_trailing_newline doesn't handle CRLF. "ls\r\n" becomes "ls\r". Strip \r as well, e.g. strcspn(user_input, "\r\n").
 }
 
 bool str_null_or_empty(const char *input) {

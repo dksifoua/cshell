@@ -2,15 +2,16 @@
 
 #include "cshell/utils.h"
 
-#include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
 #include <unistd.h>
 
-const char *BUILTIN_COMMAND_NAMES[] = { "echo", "exit", "type" };
-const size_t BUILTIN_COMMAND_NAME_COUNT = sizeof(BUILTIN_COMMAND_NAMES) / sizeof(BUILTIN_COMMAND_NAMES[0]);
+static const int COMMAND_OUTPUT_BUFFER_SIZE = 1024;
+
+static const char *const BUILTIN_COMMAND_NAMES[] = { "echo", "exit", "type" };
+static const size_t BUILTIN_COMMAND_NAME_COUNT = sizeof(BUILTIN_COMMAND_NAMES) / sizeof(BUILTIN_COMMAND_NAMES[0]);
 
 struct command parse_command(const char *user_input, size_t user_input_length) {
     struct command command = { .name[0] = '\0', .arguments[0] = '\0', .fullpath[0] = '\0', .type = UNKNOWN };
@@ -18,8 +19,11 @@ struct command parse_command(const char *user_input, size_t user_input_length) {
         return command;
     }
 
+    // TODO(dksifoua): splits only on ' '. A tab ("ls\t-l") won't be split, and "echo  hi" leaves " hi" with a leading space in arguments.
+    // parse_command truncation is silent. Names > 1024 chars and args > 3072 chars get quietly cut. For a 4096-byte input buffer this can't overflow,
+    // but names starting with 1024 chars of spaces could misbehave. Low priority.
     const char *delimiter = strchr(user_input, ' ');
-    const bool delimiter_found = delimiter != nullptr;
+    const int delimiter_found = delimiter != nullptr;
 
     size_t command_name_length = delimiter_found ? delimiter - user_input : user_input_length;
     if (command_name_length >= sizeof(command.name)) {
@@ -59,9 +63,9 @@ bool is_command_name_executable(const char *name, char *full_path, size_t full_p
         return false;
     }
 
-    const char *PATH = getenv("PATH");
+    const char *const PATH = getenv("PATH");
     if (PATH == nullptr) {
-        perror("getenv()");
+        (void) fprintf(stderr, "getenv()");
         return false;
     }
 
@@ -84,19 +88,19 @@ void execute_command(const char *input) {
         return;
     }
 
-    FILE *fd = popen(input, "r");
+    // TODO (dksifoua): Create pipe manually and redirect redirect the flux to eliminate the commands' interpreter.
+    FILE *fd = popen(input, "r"); // NOLINT(bugprone-command-processor, cert-env33-c)
     if (fd == nullptr) {
         perror("popen()");
         return;
     }
 
-    char command_output_buffer[1024];
-    while (fgets(command_output_buffer, sizeof(command_output_buffer), fd) != nullptr) {
+    char command_output_buffer[COMMAND_OUTPUT_BUFFER_SIZE];
+    while (fgets(command_output_buffer, COMMAND_OUTPUT_BUFFER_SIZE, fd) != nullptr) {
         printf("%s", command_output_buffer);
     }
 
     if (pclose(fd) == -1) {
         perror("pclose()");
     }
-    return;
 }

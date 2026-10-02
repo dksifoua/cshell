@@ -16,8 +16,9 @@ Checks: >
   readability-*,
   -readability-identifier-naming.*
 WarningsAsErrors: "*"
-ExtraArgs: ['-std=c23']
+ExtraArgs: ["-std=c23"]
 SystemHeaders: false
+HeaderFilterRegex: "^(include/|src/|tests/)"
 HeaderFileExtensions:
   - h
 ImplementationFileExtensions:
@@ -25,4 +26,6 @@ ImplementationFileExtensions:
 CheckOptions:
   - key: modernize-use-using.IgnoreMacros
     value: "true"
+  - key: readability-identifier-length.IgnoredVariableNames
+    value: "fd|id|i|j|k"
 ...

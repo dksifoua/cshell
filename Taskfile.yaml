@@ -21,9 +21,13 @@ tasks:
 
   build:
     desc: Run the build system
-    deps:
-      - configure
     cmd: cmake --build build
+
+  test:
+    desc: Run unit tests
+    deps:
+      - build
+    cmd: ctest --build-dir build --output-on-failure
 
   format:
     desc: Format sources with clang-format

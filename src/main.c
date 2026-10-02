@@ -13,7 +13,7 @@ int main() {
     printf("Welcome to cshell v%s\n", CSHELL_VERSION);
 
     char user_input[USER_INPUT_MAX_LENGTH];
-    size_t user_input_length;
+    size_t user_input_length = 0;
     struct command command;
     while (true) {
         printf("$ ");

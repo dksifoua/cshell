@@ -1,8 +1,9 @@
-#include <limits.h>
-#include <stddef.h>
-
 #ifndef COMMAND_H
 #define COMMAND_H
+
+#include <limits.h>
+#include <stdbool.h>
+#include <stddef.h>
 
 #define MAX_COMMAND_NAME_LENGTH 1024
 #define MAX_COMMAND_ARGS_LENGTH 3072
