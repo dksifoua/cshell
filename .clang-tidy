@@ -22,7 +22,7 @@ HeaderFileExtensions:
   - h
 ImplementationFileExtensions:
   - c
-
+CheckOptions:
   - key: modernize-use-using.IgnoreMacros
     value: "true"
 ...

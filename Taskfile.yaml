@@ -2,38 +2,43 @@
 
 version: '3'
 
-vars:
-  GREETING: Hello, world!
+silent: true
 
 tasks:
   default:
-    desc: Print a greeting message
-    cmds:
-      - echo "{{.GREETING}}"
-    silent: true
+    desc: List available tasks
+    cmd: task --list
 
   clean:
     desc: Clean build
     cmd: rm -rf build
-    silent: true
 
   configure:
     desc: Configure cmake build directory
-    deps:
-      - clean
-    cmd: cmake -S . -B build
-    silent: true
+    cmd: cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug
+    status:
+      - test -f build/CMakeCache.txt
 
   build:
     desc: Run the build system
     deps:
       - configure
     cmd: cmake --build build
-    silent: true
+
+  format:
+    desc: Format sources with clang-format
+    cmd: clang-format -i src/*.c include/cshell/*.h
+
+  lint:
+    desc: Lint sources with clang-tidy
+    deps:
+      - configure
+    # Homebrew's clang-tidy does not locate the macOS SDK headers on its own.
+    cmd: SDKROOT="${SDKROOT:-$(xcrun --show-sdk-path 2>/dev/null)}" clang-tidy -p build src/*.c
 
   cshell:
     desc: Run the cshell program
     deps:
       - build
     cmd: build/cshell
-    silent: true
+    interactive: true
