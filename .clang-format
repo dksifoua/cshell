@@ -2,3 +2,20 @@
 Language: C
 ColumnLimit: 150
 IndentWidth: 4
+
+IncludeBlocks: Regroup
+SortIncludes:
+  Enabled: true
+  IgnoreCase: false
+  IgnoreExtension: false
+IncludeCategories:
+  - Regex: '^"([^"]*)"$'
+    Priority: 1
+    SortPriority: 1
+  - Regex: '^<([^"]*)>$'
+    Priority: 2
+    SortPriority: 2
+
+Cpp11BracedListStyle: Block
+SpaceAfterCStyleCast: true
+SpaceBeforeCpp11BracedList: true

@@ -19,7 +19,27 @@ target_sources(cshell
     PRIVATE
         src/main.c
 )
+target_link_libraries(cshell
+    PRIVATE
+        cshellinc
+)
 target_compile_definitions(cshell
     PRIVATE
         CSHELL_VERSION="${PROJECT_VERSION}"
+)
+
+add_library(cshellinc)
+target_sources(cshellinc
+    PRIVATE
+        src/command.c
+        src/utils.c
+
+    PUBLIC
+        FILE_SET cshell_headers
+        TYPE HEADERS
+        BASE_DIRS
+            include
+        FILES
+            include/cshell/command.h
+            include/cshell/utils.h
 )
