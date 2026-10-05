@@ -17,12 +17,13 @@ option(BUILD_TESTING "Enable testing and build tests" ON)
 include(FetchContent)
 
 add_executable(cshell)
-target_compile_definitions(cshell PRIVATE CSHELL_VERSION="${PROJECT_VERSION}")
+target_compile_definitions(cshell PUBLIC CSHELL_VERSION="${PROJECT_VERSION}")
 target_compile_options(cshell PRIVATE -Wall -Wextra -Werror -pedantic)
 target_link_libraries(cshell PRIVATE cshell_lib)
 target_sources(cshell PRIVATE src/main.c)
 
 add_library(cshell_lib)
+target_compile_definitions(cshell_lib PUBLIC _POSIX_C_SOURCE=200809L)
 target_compile_options(cshell_lib PRIVATE -Wall -Wextra -Werror -pedantic)
 target_sources(cshell_lib
     PRIVATE

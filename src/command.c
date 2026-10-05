@@ -8,7 +8,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-static const int COMMAND_OUTPUT_BUFFER_SIZE = 1024;
+enum { COMMAND_OUTPUT_BUFFER_SIZE = 1024 };
 
 static const char *const BUILTIN_COMMAND_NAMES[] = { "echo", "exit", "type" };
 static const size_t BUILTIN_COMMAND_NAME_COUNT = sizeof(BUILTIN_COMMAND_NAMES) / sizeof(BUILTIN_COMMAND_NAMES[0]);
@@ -76,7 +76,7 @@ bool is_command_name_executable(const char *name, char *full_path, size_t full_p
         snprintf(full_path, full_path_length, "%s/%s", path, name);
 
         struct stat stat_buffer;
-        if (stat(full_path, &stat_buffer) == 0 && S_ISREG(stat_buffer.st_mode) && access(full_path, X_OK) == 0) {
+        if (stat(full_path, &stat_buffer) == 0 && S_ISREG(stat_buffer.st_mode) && access(full_path, X_OK) == 0) { // NOLINT(misc-include-cleaner)
             return true;
         }
     }
@@ -89,7 +89,7 @@ void execute_command(const char *input) {
     }
 
     // TODO (dksifoua): Create pipe manually and redirect redirect the flux to eliminate the commands' interpreter.
-    FILE *fd = popen(input, "r"); // NOLINT(bugprone-command-processor, cert-env33-c)
+    FILE *fd = popen(input, "r"); // NOLINT(bugprone-command-processor, cert-env33-c, misc-include-cleaner)
     if (fd == nullptr) {
         perror("popen()");
         return;
@@ -100,7 +100,7 @@ void execute_command(const char *input) {
         printf("%s", command_output_buffer);
     }
 
-    if (pclose(fd) == -1) {
+    if (pclose(fd) == -1) { // NOLINT(misc-include-cleaner)
         perror("pclose()");
     }
 }

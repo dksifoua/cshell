@@ -5,4 +5,4 @@ set -euo pipefail
 
 source "$(dirname "${BASH_SOURCE[0]}")/_common.sh"
 
-clang-format -i src/*.c include/cshell/*.h
+clang-format -i src/*.c tests/*.c include/cshell/*.h

@@ -12,4 +12,4 @@ if [[ "$(uname)" == Darwin ]]; then
 fi
 
 run_task configure
-clang-tidy -p build src/*.c
+clang-tidy -p build src/*.c tests/*.c

@@ -6,7 +6,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define USER_INPUT_MAX_LENGTH 4096
+enum { USER_INPUT_MAX_LENGTH = 4096 };
 
 int main() {
     disable_stdout_buffering();
@@ -18,7 +18,7 @@ int main() {
     while (true) {
         printf("$ ");
 
-        if (fgets(user_input, sizeof(user_input), stdin) == nullptr) {
+        if (fgets(user_input, USER_INPUT_MAX_LENGTH, stdin) == nullptr) {
             if (ferror(stdin) != 0) {
                 perror("fgets()");
             }

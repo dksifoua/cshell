@@ -1,0 +1,21 @@
+name: ci
+on: [push, pull_request]
+
+jobs:
+  continuous-integration:
+    strategy:
+      matrix:
+        os:
+          - ubuntu-latest
+
+    runs-on: ${{matrix.os}}
+
+    steps:
+      - uses: actions/checkout@v7
+      - run: sudo apt-get update && sudo apt-get install -y clang-format clang-tidy
+      - run: chmod +x task.sh scripts/*.sh
+      - run: ./task.sh configure
+      - run: ./task.sh build
+      - run: ./task.sh test
+      - run: ./task.sh format && git diff --exit-code
+      - run: ./task.sh lint
